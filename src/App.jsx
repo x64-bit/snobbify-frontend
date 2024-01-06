@@ -27,6 +27,10 @@ function getTokenFromUrl() {
     return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
 };
 
+function login() {
+    
+}
+
 function App() {
     // const [userData, setUserData] = useState();
     const [spotifyToken, setSpotifyToken] = useState("");
@@ -64,7 +68,7 @@ function App() {
         <div className='app'>
             <header className='app-header'>
                 <h1>Spotify with React</h1>
-                {!loggedIn && <a href="http://localhost:8888">login to spotify</a>}
+                {!loggedIn && <a href="http://localhost:8888/login">login to spotify</a>}
                 {loggedIn && (
                     <>
                         <div>Now Playing: {nowPlaying.name}</div>
