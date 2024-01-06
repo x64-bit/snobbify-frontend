@@ -8,6 +8,8 @@ import 'axios';
 // const AUTH_ENDPOINT = "https://accounts.spotify.com/authorize"
 // const RESPONSE_TYPE = "token"
 
+const BACKEND_ROUTE = "http://localhost:8888"
+
 const spotifyApi = new SpotifyWebApi();
 
 // const params = new URLSearchParams();
@@ -27,12 +29,24 @@ function getTokenFromUrl() {
     return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
 };
 
-function login() {
-    
+async function newGetPlaying({ accessToken, setNowPlaying }) {
+    console.log(`newGetPlaying; accessToken=${accessToken}`)
+
+    const result = await fetch(BACKEND_ROUTE + "/getPlaying", {
+        method: "GET",
+        headers: { Authorization: `Bearer ${accessToken}`}
+    });
+
+    // const { access_token } = await result.json();
+    setNowPlaying({
+        name : result.name,
+        albumArt: result.album_art
+    });
 }
 
 function App() {
     // const [userData, setUserData] = useState();
+    // TODO: VERY NOT SAFE DO NOT STORE TOKEN IN STATE
     const [spotifyToken, setSpotifyToken] = useState("");
     const [nowPlaying, setNowPlaying] = useState({});
     const [loggedIn, setLoggedIn] = useState(false);
@@ -40,18 +54,19 @@ function App() {
     useEffect (() => {
         console.log("This is what we derived from the url: ");
         console.log(window.location.hash);
-        const spotifyToken = getTokenFromUrl();
+        const newSpotifyToken = getTokenFromUrl();
         // history.pushState("", document.title, window.location.pathname
         //                                                + window.location.search);
-        console.log("This is our spotify token", spotifyToken);
-        if (spotifyToken) {
-            setSpotifyToken(spotifyToken);
-            spotifyApi.setAccessToken(spotifyToken);
+        console.log("This is our spotify token", newSpotifyToken);
+        if (newSpotifyToken) {
+            setSpotifyToken(newSpotifyToken);
+            spotifyApi.setAccessToken(newSpotifyToken);
             spotifyApi.getMe().then((user) => {
                 console.log(user);
             })
             setLoggedIn(true);
         }
+        console.log("state token:", spotifyToken);
     }, [])
 
     const getNowPlaying = () => {
@@ -78,7 +93,7 @@ function App() {
                     </>
                 )}
                 {loggedIn && (
-                    <button onClick={() => getNowPlaying()}>Check Now Playing</button>
+                    <button onClick={() => newGetPlaying(spotifyToken, setNowPlaying)}>Check Now Playing</button>
                 )}
             </header>
         </div>
