@@ -75,7 +75,48 @@ function App() {
         console.log("cookie token:", Cookies.get('token'));
     }, [])
 
-    async function generateRoast() {
+    async function roastTracks() {
+        // console.log("getNowPlaying")
+    
+        // not sure if i did this right lol
+        spotifyApi.getMyTopTracks({ limit: 5 })
+            .then(function(response) {
+                // let topTracks = []
+                let topTracks = {}
+                for (let i = 0; i < response.items.length; i++) {
+                    let artists = [];
+                    for (let j = 0; j < response.items[i].artists.length; j++) {
+                        // console.log(response.items[i].artists[j]);
+                        artists.push(response.items[i].artists[j].name);
+                    }
+                    let artistsStr = artists.join(", ");
+                    topTracks[artistsStr] = response.items[i].name;
+                }
+                console.log(topTracks);
+                return topTracks;
+            }, function(err) {
+                console.log('Something went wrong!', err);
+            })
+            .then(async (topTracks) => {
+                console.log("[roastTracks()] fetching gptResponse")
+                const gptResponse = await fetch(BACKEND_ROUTE + "/roastTracks", {
+                    method: "POST",
+                    headers: {'content-type' : 'application/json'},
+                    body: JSON.stringify(topTracks)
+                })
+                console.log("gptResponse:", gptResponse);
+                return gptResponse;
+            })
+            .then((res) => res.json())
+            .then(async (gptJson) => {
+                let gptRoast = gptJson.gpt_response;
+                setResponseLoaded(true);
+                setRoast(gptRoast.message.content);
+                console.log(gptRoast.message.content);
+            });
+    }
+
+    async function roastArtists() {
         // console.log("getNowPlaying")
     
         // not sure if i did this right lol
@@ -91,7 +132,7 @@ function App() {
             })
             .then(async (topArtists) => {
                 console.log("[generateRoast()] fetching gptResponse")
-                const gptResponse = await fetch(BACKEND_ROUTE + "/roast", {
+                const gptResponse = await fetch(BACKEND_ROUTE + "/roastArtists", {
                     method: "POST",
                     headers: {'content-type' : 'application/json'},
                     body: JSON.stringify({"topArtists" : topArtists})
@@ -119,7 +160,7 @@ function App() {
                 </h3>
                 {!loggedIn && <a href="http://localhost:8888/login">login to spotify</a>}
                 {loggedIn && (
-                    <button onClick={() => generateRoast()}>Generate Roast</button>
+                    <button onClick={() => roastTracks()}>Generate Roast</button>
                 )}
                 {loggedIn && responseLoaded && (
                     <div>{roast}</div>
