@@ -73,18 +73,6 @@ function getTokenFromUrl() {
     return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
 };
 
-// async function main() {
-//     const completion = await openai.chat.completions.create({
-//         messages: [
-//             { role: "system", content: PROMPT },
-//             { role: "user", content: "{Bon Iver, Radiohead, Aphex Twin}"}
-//         ],
-//         model: "gpt-3.5-turbo",
-//     });
-  
-//     console.log(completion.choices[0]);
-// }
-
 async function getNowPlaying() {
     console.log("getNowPlaying")
     spotifyApi.getMyCurrentPlaybackState().then((response) => {
@@ -96,21 +84,38 @@ async function getNowPlaying() {
     })
 }
 
-// async function generateRoast() {
-//     topArtists = await generateRoast();
-//     console.log("generateRoast, topArtists:", topArtists);
-//     // topArtistsStr = "{" + topArtists.join(", ") + "}";
-//     console.log("generateRoast:",topArtistsStr);
-    
-//     // const completion = await openai.chat.completions.create({
-//     //     messages: [
-//     //         { role: "system", content: PROMPT },
-//     //         { role: "user", content: "{Bon Iver, Radiohead, Aphex Twin}"}
-//     //     ],
-//     //     model: "gpt-3.5-turbo",
-//     // });
+// async function generateRoastClassic() {
+//     // console.log("getNowPlaying")
 
-//     // console.log(completion.choices[0]);
+//     // not sure if i did this right lol
+//     spotifyApi.getMyTopArtists()
+//         .then((response) => {
+//             // console.log(data);
+//             // let topArtists = data.items;
+//             // console.log(response.items);
+//             let topArtists = []
+//             for (let i = 0; i < response.items.length; i++) {
+//                 topArtists.push(response.items[i].name);
+//             }
+//             return topArtists;
+//         }, function(err) {
+//             console.log('Something went wrong!', err);
+//         })
+//         .then(async (topArtists) => {
+//             let topArtistsStr = "{" + topArtists.join(", ") + "}";
+//             console.log("generateRoast, topArtists:", topArtists);
+//             console.log("generateRoast:",topArtistsStr);
+            
+//             const completion = await openai.chat.completions.create({
+//                 messages: [
+//                     { role: "system", content: PROMPT },
+//                     { role: "user", content: topArtistsStr}
+//                 ],
+//                 model: "gpt-3.5-turbo",
+//             });
+
+//             console.log("GPT response:", completion.choices[0]);
+//         });
 // }
 
 async function generateRoast() {
@@ -131,19 +136,21 @@ async function generateRoast() {
             console.log('Something went wrong!', err);
         })
         .then(async (topArtists) => {
-            let topArtistsStr = "{" + topArtists.join(", ") + "}";
-            console.log("generateRoast, topArtists:", topArtists);
-            console.log("generateRoast:",topArtistsStr);
-            
-            const completion = await openai.chat.completions.create({
-                messages: [
-                    { role: "system", content: PROMPT },
-                    { role: "user", content: topArtistsStr}
-                ],
-                model: "gpt-3.5-turbo",
-            });
-
-            console.log("GPT response:", completion.choices[0]);
+            console.log("[generateRoast()] fetching gptResponse")
+            const gptResponse = await fetch(BACKEND_ROUTE + "/roast", {
+                method: "POST",
+                headers: {'content-type' : 'application/json'},
+                body: JSON.stringify({"topArtists" : topArtists})
+            })
+            console.log("gptResponse:", gptResponse);
+            return gptResponse;
+        })
+        .then(async (res) => {
+            return await res.json();
+        })
+        .then(async (gptJson) => {
+            let gptRoast = gptJson.gpt_response;
+            console.log(gptRoast);
         });
 }
 
