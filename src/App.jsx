@@ -201,7 +201,9 @@ function App() {
             })
             .then(async (gptJson) => {
                 let gptRoast = gptJson.gpt_response;
-                console.log(gptRoast);
+                setResponseLoaded(true);
+                setRoast(gptRoast.message.content);
+                console.log(gptRoast.message.content);
             });
     }
 
@@ -211,15 +213,10 @@ function App() {
                 <h1>Spotify with React</h1>
                 {!loggedIn && <a href="http://localhost:8888/login">login to spotify</a>}
                 {loggedIn && (
-                    <>
-                        <div>Now Playing: {nowPlaying.name}</div>
-                        <div>
-                            <img src={nowPlaying.albumArt} style={{height: 150}}/>
-                        </div>
-                    </>
+                    <button onClick={() => generateRoast()}>Generate Roast</button>
                 )}
-                {loggedIn && (
-                    <button onClick={() => generateRoast()}>Check Now Playing</button>
+                {loggedIn && responseLoaded && (
+                    <div>{roast}</div>
                 )}
             </header>
         </div>
