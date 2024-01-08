@@ -118,42 +118,6 @@ async function getNowPlaying() {
 //         });
 // }
 
-async function generateRoast() {
-    // console.log("getNowPlaying")
-
-    // not sure if i did this right lol
-    spotifyApi.getMyTopArtists()
-        .then((response) => {
-            // console.log(data);
-            // let topArtists = data.items;
-            // console.log(response.items);
-            let topArtists = []
-            for (let i = 0; i < response.items.length; i++) {
-                topArtists.push(response.items[i].name);
-            }
-            return topArtists;
-        }, function(err) {
-            console.log('Something went wrong!', err);
-        })
-        .then(async (topArtists) => {
-            console.log("[generateRoast()] fetching gptResponse")
-            const gptResponse = await fetch(BACKEND_ROUTE + "/roast", {
-                method: "POST",
-                headers: {'content-type' : 'application/json'},
-                body: JSON.stringify({"topArtists" : topArtists})
-            })
-            console.log("gptResponse:", gptResponse);
-            return gptResponse;
-        })
-        .then(async (res) => {
-            return await res.json();
-        })
-        .then(async (gptJson) => {
-            let gptRoast = gptJson.gpt_response;
-            console.log(gptRoast);
-        });
-}
-
 async function proxyGetPlaying() {
     let accessToken = Cookies.get('token');
     console.log("[proxyGetPlaying] access token:", accessToken);
@@ -180,6 +144,8 @@ function App() {
     // TODO: VERY NOT SAFE DO NOT STORE TOKEN IN STATE
     const [spotifyToken, setSpotifyToken] = useState("");
     const [nowPlaying, setNowPlaying] = useState({});
+    const [responseLoaded, setResponseLoaded] = useState(false);
+    const [roast, setRoast] = useState("");
     const [loggedIn, setLoggedIn] = useState(false);
 
     useEffect (() => {
@@ -202,6 +168,42 @@ function App() {
         }
         console.log("cookie token:", Cookies.get('token'));
     }, [])
+
+    async function generateRoast() {
+        // console.log("getNowPlaying")
+    
+        // not sure if i did this right lol
+        spotifyApi.getMyTopArtists({ limit: 5 })
+            .then((response) => {
+                // console.log(data);
+                // let topArtists = data.items;
+                // console.log(response.items);
+                let topArtists = []
+                for (let i = 0; i < response.items.length; i++) {
+                    topArtists.push(response.items[i].name);
+                }
+                return topArtists;
+            }, function(err) {
+                console.log('Something went wrong!', err);
+            })
+            .then(async (topArtists) => {
+                console.log("[generateRoast()] fetching gptResponse")
+                const gptResponse = await fetch(BACKEND_ROUTE + "/roast", {
+                    method: "POST",
+                    headers: {'content-type' : 'application/json'},
+                    body: JSON.stringify({"topArtists" : topArtists})
+                })
+                console.log("gptResponse:", gptResponse);
+                return gptResponse;
+            })
+            .then(async (res) => {
+                return await res.json();
+            })
+            .then(async (gptJson) => {
+                let gptRoast = gptJson.gpt_response;
+                console.log(gptRoast);
+            });
+    }
 
     return (
         <div className='app'>
