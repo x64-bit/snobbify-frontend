@@ -2,8 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import SpotifyWebApi from "spotify-web-api-js";
 import 'axios';
-import Cookies from 'js-cookie';
-import OpenAI from "openai";
 
 const BACKEND_ROUTE = "http://localhost:8888"
 
@@ -35,10 +33,11 @@ function Header() {
 
 function LoadingPopup() {
     return (
-        <div className='padding p-4 my-12 max-w-128 flex rounded-md bg-stone-800 whitespace-pre font-mono text-wrap'>
-            {"loading\n"}
-            <img src="public/wojak.jpeg" className='animate-pulse rounded-md p-4'></img>
+        <div className='padding p-4 my-12 max-w-128 rounded-md bg-stone-800 whitespace-pre font-mono'>
+            loading...
+            <img src="public/wojak.jpeg" className='animate-pulse object-contain w-128 rounded-md p-4'></img>
         </div>
+        
     )
 }
 
