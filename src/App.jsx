@@ -208,9 +208,10 @@ function App() {
                 )} */}
 
                 {loggedIn && responseLoaded && (
-                    <div className='padding p-4 my-12 max-w-96 flex rounded-md bg-stone-800'>
-                        <button onClick={() => setResponseLoaded(false)}></button>
-                        <div className='whitespace-pre font-mono text-wrap'>{"Output: \n> "}{roast}</div>
+                    <div>
+                        <button className='bg-stone-800 hover:bg-stone-900 rounded-md px-2.5 py-2.5' 
+                            onClick={() => setResponseLoaded(false)}>roast again</button>
+                        <div className='padding p-4 my-12 max-w-96 flex rounded-md bg-stone-800 whitespace-pre font-mono text-wrap'>{"Output: \n> "}{roast}</div>
                     </div>
                 )}
             </div>
