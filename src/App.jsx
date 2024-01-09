@@ -191,7 +191,7 @@ function App() {
                 {!loggedIn && (
                     <div className='h-64 w-32'>
                         <a className='bg-stone-800 hover:bg-stone-900 rounded-md px-2.5 py-2.5' 
-                            href="http://localhost:8888/login">login to spotify</a>
+                            href={BACKEND_ROUTE+"/login"}>login to spotify</a>
                     </div>
                 )}
                 {loggedIn && (responseState === LoadingState.INPUT) && (
