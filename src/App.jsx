@@ -15,8 +15,11 @@ const LoadingState = {
 Object.freeze(LoadingState);
 
 function getTokenFromUrl() {
-    return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
-};
+    let access_token = new URLSearchParams(window.location.hash.substring(1)).get("access_token");
+    history.pushState("", document.title, window.location.pathname
+                                                       + window.location.search);
+    return access_token
+}
 
 function Header() {
     return (
@@ -74,23 +77,15 @@ function App() {
 
     useEffect (() => {
         const newSpotifyToken = getTokenFromUrl();
-        // history.pushState("", document.title, window.location.pathname
-        //                                                + window.location.search);
-        // console.log("This is our spotify token", newSpotifyToken);
         if (newSpotifyToken) {
             spotifyApi.setAccessToken(newSpotifyToken);
-            // spotifyApi.getMe().then((user) => {
-            //     console.log(user);
-            // })
             setLoggedIn(true);
             console.log("Logged in");
         }
-        // console.log("cookie token:", Cookies.get('token'));
     }, [])
 
     async function handleSubmit(e) {
         // Prevent the browser from reloading the page
-        console.log("bruh momentum");
         e.preventDefault();
 
         // Read the form data
@@ -98,8 +93,6 @@ function App() {
         const formData = new FormData(form);
         
         const formJson = Object.fromEntries(formData.entries());
-        console.log(formJson); 
-        console.log(formJson.roast_type);
         if (formJson.roast_type == "artists") {
             await roastArtists(formJson.roast_period);
         } else if (formJson.roast_type == "tracks") {
@@ -108,36 +101,33 @@ function App() {
     }
 
     async function roastTracks(time_range) {
-        console.log("roastTracks", time_range);
+        console.log("roast tracks:", time_range);
         setResponseState(LoadingState.LOADING);
     
-        // not sure if i did this right lol
         spotifyApi.getMyTopTracks({ limit: 5 , time_range: time_range})
             .then(function(response) {
                 let topTracks = {}
                 for (let i = 0; i < response.items.length; i++) {
                     let artists = [];
                     for (let j = 0; j < response.items[i].artists.length; j++) {
-                        // console.log(response.items[i].artists[j]);
                         artists.push(response.items[i].artists[j].name);
                     }
                     let artistsStr = artists.join(", ");
                     topTracks[artistsStr] = response.items[i].name;
                 }
-                console.log(topTracks);
                 return topTracks;
             }, function(err) {
                 console.log('Something went wrong!', err);
                 setResponseState(LoadingState.INPUT);
             })
             .then(async (topTracks) => {
+                // proxy request to backend to ask for chatGPT output
                 console.log("[roastTracks()] fetching gptResponse")
                 const gptResponse = await fetch(BACKEND_ROUTE + "/roastTracks", {
                     method: "POST",
                     headers: {'content-type' : 'application/json'},
                     body: JSON.stringify(topTracks)
                 })
-                console.log("gptResponse:", gptResponse);
                 return gptResponse;
             }, function(err) {
                 console.log('Something went wrong!', err);
@@ -148,7 +138,6 @@ function App() {
                 let gptRoast = gptJson.gpt_response;
                 setResponseState(LoadingState.OUTPUT);
                 setRoast(gptRoast.message.content);
-                console.log(gptRoast.message.content);
             }, function(err) {
                 console.log('Something went wrong!', err);
                 setResponseState(LoadingState.INPUT);
@@ -156,7 +145,7 @@ function App() {
     }
 
     async function roastArtists(time_range) {
-        console.log("roastArtists", time_range);
+        console.log("roast artists:", time_range);
         setResponseState(LoadingState.LOADING);
     
         // not sure if i did this right lol
@@ -166,20 +155,19 @@ function App() {
                 for (let i = 0; i < response.items.length; i++) {
                     topArtists.push(response.items[i].name);
                 }
-                console.log(topArtists);
                 return topArtists;
             }, function(err) {
                 console.log('Something went wrong!', err);
                 setResponseState(LoadingState.INPUT);
             })
             .then(async (topArtists) => {
+                // proxy request to backend to ask for chatGPT output
                 console.log("[generateRoast()] fetching gptResponse")
                 const gptResponse = await fetch(BACKEND_ROUTE + "/roastArtists", {
                     method: "POST",
                     headers: {'content-type' : 'application/json'},
                     body: JSON.stringify({"topArtists" : topArtists})
                 })
-                console.log("gptResponse:", gptResponse);
                 return gptResponse;
             }, function(err) {
                 console.log('Something went wrong!', err);
@@ -190,7 +178,6 @@ function App() {
                 let gptRoast = gptJson.gpt_response;
                 setResponseState(LoadingState.OUTPUT);
                 setRoast(gptRoast.message.content);
-                console.log(gptRoast.message.content);
             }, function(err) {
                 console.log('Something went wrong!', err);
                 setResponseState(LoadingState.INPUT);
