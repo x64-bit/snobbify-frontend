@@ -34,9 +34,22 @@ async function proxyGetPlaying() {
     });
 }
 
+function Header() {
+    return (
+        <header>
+            <h1 className='bg-clip-border text-6xl text-white font-extrabold padding py-0'>
+                &gt;snobbify
+            </h1>
+            <h3 className='mt-2 font-medium'>
+                get your garbage music taste roasted by chatgpt {":')"}
+            </h3>
+        </header>
+    )
+}
+
 function RoastParams ({ handleSubmit }) {
     return (
-        <form onSubmit={handleSubmit} className=''>
+        <form onSubmit={handleSubmit}>
             roast top 5:
             <br></br>
             <select className='text-stone bg-stone-600 rounded-md py-1 px-2'>
@@ -52,7 +65,8 @@ function RoastParams ({ handleSubmit }) {
                 <option value="long-term">all time</option>
             </select>
             <br></br>
-            <button className='bg-stone-800 hover:bg-stone-900 rounded-md my-4 px-2.5 py-2.5'>generate roast</button>
+            <button className='bg-stone-800 hover:bg-stone-900 rounded-md my-4 px-2.5 py-2.5'
+                type="submit">generate roast</button>
         </form>
     )
 }
@@ -179,14 +193,7 @@ function App() {
     return (
         <div className="text-slate-200 flex min-h-screen">
             <div className='padding m-auto space-y-5'>
-                <header>
-                    <h1 className='bg-clip-border text-6xl text-white font-extrabold padding py-0'>
-                        &gt;snobbify
-                    </h1>
-                    <h3 className='mt-2 font-medium'>
-                        get your garbage music taste roasted by chatgpt {":')"}
-                    </h3>
-                </header>
+                <Header></Header>
                 {!loggedIn && (
                     <div className='h-64 w-32'>
                         <a className='bg-stone-800 hover:bg-stone-900 rounded-md px-2.5 py-2.5' 
@@ -194,7 +201,7 @@ function App() {
                     </div>
                 )}
                 {loggedIn && !responseLoaded && (
-                    <RoastParams handleClick={handleSubmit}></RoastParams>
+                    <RoastParams onSubmit={handleSubmit}></RoastParams>
                 )}
                 {/* {loggedIn && (
                     <button className='bg-stone-800 hover:bg-stone-900 rounded-md px-2.5 py-2.5' 
