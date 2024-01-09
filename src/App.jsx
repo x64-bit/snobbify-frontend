@@ -125,7 +125,7 @@ function App() {
                 // proxy request to backend to ask for chatGPT output
                 console.log("[roastTracks()] fetching gptResponse")
                 const myHeaders = new Headers()
-                myHeaders.append('content-type', 'application/json');\
+                myHeaders.append('content-type', 'application/json'); 
                 // myHeaders.append('Access-Control-Allow-Credentials', 'true');
                 const gptResponse = await fetch(BACKEND_ROUTE + "/roastTracks", {
                     method: "POST",
