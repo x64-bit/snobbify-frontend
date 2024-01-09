@@ -9,30 +9,16 @@ const BACKEND_ROUTE = "http://localhost:8888"
 
 const spotifyApi = new SpotifyWebApi();
 
+const LoadingState = {
+    INPUT: 1,
+    LOADING: 2,
+    OUTPUT: 3
+};
+Object.freeze(LoadingState);
+
 function getTokenFromUrl() {
     return new URLSearchParams(window.location.hash.substring(1)).get("access_token");
 };
-
-async function proxyGetPlaying() {
-    let accessToken = Cookies.get('token');
-    console.log("[proxyGetPlaying] access token:", accessToken);
-    console.log("huh?");
-
-    const result = await fetch(BACKEND_ROUTE + "/getPlaying", {
-        method: "GET",
-        headers: { 'Authorization': `Bearer ${accessToken}`}
-    });
-    
-    console.log("what?");
-    const data = await result.json();
-    console.log(data);
-
-    // const { access_token } = await result.json();
-    setNowPlaying({
-        name : data.name,
-        albumArt: data.album_art
-    });
-}
 
 function Header() {
     return (
@@ -40,10 +26,19 @@ function Header() {
             <h1 className='bg-clip-border text-6xl text-white font-extrabold padding py-0'>
                 &gt;snobbify
             </h1>
-            <h3 className='mt-2 text-xl font-medium'>
+            <h3 className='mt-2 text-xl font-semibold'>
                 get your garbage music taste roasted by chatgpt {":')"}
             </h3>
         </header>
+    )
+}
+
+function LoadingPopup() {
+    return (
+        <div className='padding p-4 my-12 max-w-128 flex rounded-md bg-stone-800 whitespace-pre font-mono text-wrap'>
+            {"loading\n"}
+            <img src="public/wojak.jpeg" className='animate-pulse rounded-md p-4'></img>
+        </div>
     )
 }
 
@@ -52,14 +47,14 @@ function RoastParams ({ handleSubmit }) {
         <form onSubmit={handleSubmit}>
             roast top 5:
             <br></br>
-            <select name='roast_type' className='text-stone bg-stone-600 rounded-md py-1 px-2'>
+            <select name='roast_type' className='text-stone bg-stone-700 rounded-md py-1 px-2'>
                 <option value="artists">artists</option>
                 <option value="tracks">tracks</option>
             </select>
             <br></br>
             time period:
             <br></br>
-            <select name='roast_period' className='text-stone bg-stone-600 rounded-md py-1 px-2'>
+            <select name='roast_period' className='text-stone bg-stone-700 rounded-md py-1 px-2'>
                 <option value="short_term">4 weeks</option>
                 <option value="medium_term">6 months</option>
                 <option value="long_term">all time</option>
@@ -72,8 +67,9 @@ function RoastParams ({ handleSubmit }) {
 }
 
 function App() {
-    const [responseLoaded, setResponseLoaded] = useState(false);
-    const [loading, setLoading] = useState()
+    // states: {input, loading, output}
+    // i know it's jank but i just want to get this done at this point lmao
+    const [responseState, setResponseState] = useState(LoadingState.INPUT);
     const [roast, setRoast] = useState("");
     const [loggedIn, setLoggedIn] = useState(false);
 
@@ -114,11 +110,11 @@ function App() {
 
     async function roastTracks(time_range) {
         console.log("roastTracks", time_range);
+        setResponseState(LoadingState.LOADING);
     
         // not sure if i did this right lol
         spotifyApi.getMyTopTracks({ limit: 5 , time_range: time_range})
             .then(function(response) {
-                // let topTracks = []
                 let topTracks = {}
                 for (let i = 0; i < response.items.length; i++) {
                     let artists = [];
@@ -133,6 +129,7 @@ function App() {
                 return topTracks;
             }, function(err) {
                 console.log('Something went wrong!', err);
+                setResponseState(LoadingState.INPUT);
             })
             .then(async (topTracks) => {
                 console.log("[roastTracks()] fetching gptResponse")
@@ -143,18 +140,25 @@ function App() {
                 })
                 console.log("gptResponse:", gptResponse);
                 return gptResponse;
+            }, function(err) {
+                console.log('Something went wrong!', err);
+                setResponseState(LoadingState.INPUT);
             })
             .then((res) => res.json())
             .then(async (gptJson) => {
                 let gptRoast = gptJson.gpt_response;
-                setResponseLoaded(true);
+                setResponseState(LoadingState.OUTPUT);
                 setRoast(gptRoast.message.content);
                 console.log(gptRoast.message.content);
+            }, function(err) {
+                console.log('Something went wrong!', err);
+                setResponseState(LoadingState.INPUT);
             });
     }
 
     async function roastArtists(time_range) {
         console.log("roastArtists", time_range);
+        setResponseState(LoadingState.LOADING);
     
         // not sure if i did this right lol
         spotifyApi.getMyTopArtists({ limit: 5, time_range: time_range })
@@ -167,6 +171,7 @@ function App() {
                 return topArtists;
             }, function(err) {
                 console.log('Something went wrong!', err);
+                setResponseState(LoadingState.INPUT);
             })
             .then(async (topArtists) => {
                 console.log("[generateRoast()] fetching gptResponse")
@@ -177,20 +182,24 @@ function App() {
                 })
                 console.log("gptResponse:", gptResponse);
                 return gptResponse;
+            }, function(err) {
+                console.log('Something went wrong!', err);
+                setResponseState(LoadingState.INPUT);
             })
-            .then(async (res) => {
-                return await res.json();
-            })
+            .then((res) => res.json())
             .then(async (gptJson) => {
                 let gptRoast = gptJson.gpt_response;
-                setResponseLoaded(true);
+                setResponseState(LoadingState.OUTPUT);
                 setRoast(gptRoast.message.content);
                 console.log(gptRoast.message.content);
-            });
+            }, function(err) {
+                console.log('Something went wrong!', err);
+                setResponseState(LoadingState.INPUT);
+            })
     }
 
     return (
-        <div className="text-slate-200 flex min-h-screen">
+        <div className="text-slate-200 text-pretty flex min-h-screen">
             <div className='padding mx-auto my-40 space-y-5'>
                 <Header></Header>
                 {!loggedIn && (
@@ -199,19 +208,17 @@ function App() {
                             href="http://localhost:8888/login">login to spotify</a>
                     </div>
                 )}
-                {loggedIn && !responseLoaded && (
+                {loggedIn && (responseState === LoadingState.INPUT) && (
                     <RoastParams handleSubmit={handleSubmit}></RoastParams>
                 )}
-                {/* {loggedIn && (
-                    <button className='bg-stone-800 hover:bg-stone-900 rounded-md px-2.5 py-2.5' 
-                        onClick={() => roastArtists()}>generate roast</button>
-                )} */}
-
-                {loggedIn && responseLoaded && (
+                {loggedIn && (responseState === LoadingState.LOADING) && (
+                    <LoadingPopup></LoadingPopup>
+                )}
+                {loggedIn && (responseState === LoadingState.OUTPUT) && (
                     <div>
                         <button className='bg-stone-800 hover:bg-stone-900 rounded-md px-2.5 py-2.5' 
-                            onClick={() => setResponseLoaded(false)}>roast again</button>
-                        <div className='padding p-4 my-12 max-w-96 flex rounded-md bg-stone-800 whitespace-pre font-mono text-wrap'>{"Output: \n> "}{roast}</div>
+                            onClick={() => setResponseState(LoadingState.INPUT)}>roast again</button>
+                        <div className='padding p-4 my-12 max-w-128 flex rounded-md bg-stone-800 whitespace-pre font-mono text-pretty'>{"Output: \n> "}{roast}</div>
                     </div>
                 )}
             </div>
