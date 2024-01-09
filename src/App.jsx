@@ -75,6 +75,23 @@ function App() {
         console.log("cookie token:", Cookies.get('token'));
     }, [])
 
+    async function handleSubmit(e) {
+        // Prevent the browser from reloading the page
+        e.preventDefault();
+        // // Read the form data
+        // const form = e.target;
+        // const formData = new FormData(form);
+        // // You can pass formData as a fetch body directly:
+        // fetch('/some-api', { method: form.method, body: formData });
+        // // You can generate a URL out of it, as the browser does by default:
+        // console.log(new URLSearchParams(formData).toString());
+        // // You can work with it as a plain object.
+        // const formJson = Object.fromEntries(formData.entries());
+        // console.log(formJson); // (!) This doesn't include multiple select values
+        // // Or you can get an array of name-value pairs.
+        // console.log([...formData.entries()]);
+    }
+
     async function roastTracks() {
         // console.log("getNowPlaying")
     
@@ -152,25 +169,50 @@ function App() {
     }
 
     return (
-        <div className="text-slate-200 flex h-screen">
-            <section className='padding my-auto mr-0.5'>
-                <h1 className='bg-clip-border text-6xl text-white font-bold padding py-0'>
-                    &gt;snobbify
-                </h1>
-                <h3 className='mt-2 mb-12'>
-                    get your garbage music taste roasted by chatgpt {":')"}
-                </h3>
-                {!loggedIn && <a className='bg-clip-padding padding p-4 bg-stone-800 rounded-md' href="http://localhost:8888/login">login to spotify</a>}
+        <div className="text-slate-200 flex min-h-screen">
+            <div className='padding m-auto space-y-5'>
+                <header>
+                    <h1 className='bg-clip-border text-6xl text-white font-extrabold padding py-0'>
+                        &gt;snobbify
+                    </h1>
+                    <h3 className='mt-2 font-medium'>
+                        get your garbage music taste roasted by chatgpt {":')"}
+                    </h3>
+                </header>
+                {!loggedIn && (
+                    <div className='h-64 w-32'>
+                        <a className='bg-stone-800 hover:bg-stone-900 rounded-md px-2.5 py-2.5' 
+                            href="http://localhost:8888/login">login to spotify</a>
+                    </div>
+                )}
+                {loggedIn && !responseLoaded && (
+                    <div>
+                        roast top 5:
+                        <br></br>
+                        <select className='text-stone bg-stone-600 rounded-md py-1 px-2'>
+                            <option value="artists">artists</option>
+                            <option value="tracks">tracks</option>
+                        </select>
+                        <br></br>
+                        time period:
+                        <br></br>
+                        <select className='text-stone bg-stone-600 rounded-md py-1 px-2'>
+                            <option value="short-term">4 weeks</option>
+                            <option value="medium-term">6 months</option>
+                            <option value="long-term">all time</option>
+                        </select>
+                    </div>
+                )}
                 {loggedIn && (
-                    <button className='bg-clip-padding padding p-4 bg-stone-800 rounded-md' onClick={() => roastTracks()}>Generate Roast</button>
+                    <button className='bg-stone-800 hover:bg-stone-900 rounded-md px-2.5 py-2.5' 
+                        onClick={() => roastArtists()}>generate roast</button>
                 )}
                 {loggedIn && responseLoaded && (
-                    <div className='whitespace-pre content-right'>{roast}</div>
+                    <div className='padding p-4 my-12 max-w-96 flex rounded-md bg-stone-800'>
+                        <div className='whitespace-pre font-mono text-wrap'>{"Output: \n> "}{roast}</div>
+                    </div>
                 )}
-            </section>
-            <section className='padding p-4 my-auto mr-0.15 ml-0.5 flex bg-stone-700'>
-                asdfjklsdjfklasjdfklasjdfklasjdklfjasklfjasljfasdl;jfkas;dljkfasdl;
-            </section>
+            </div>
         </div>
     )
 }
