@@ -25,7 +25,7 @@ function Header() {
                 &gt;snobbify
             </h1>
             <h3 className='mt-2 text-xl font-semibold'>
-                get your garbage music taste roasted by chatgpt {":')"}
+                get your garbage music taste roasted by chatgpt
             </h3>
         </header>
     )
@@ -35,7 +35,7 @@ function LoadingPopup() {
     return (
         <div className='padding p-4 my-12 max-w-128 rounded-md bg-stone-800 whitespace-pre font-mono'>
             loading...
-            <img src="public/wojak.jpeg" className='animate-pulse object-contain w-128 rounded-md p-4'></img>
+            <img src="wojak.jpeg" className='animate-pulse object-contain w-128 rounded-md p-4'></img>
         </div>
         
     )
@@ -100,9 +100,9 @@ function App() {
         const formJson = Object.fromEntries(formData.entries());
         console.log(formJson); 
         console.log(formJson.roast_type);
-        if (formJson.roast_type = "artists") {
+        if (formJson.roast_type == "artists") {
             await roastArtists(formJson.roast_period);
-        } else if (formJson.roast_type = "tracks") {
+        } else if (formJson.roast_type == "tracks") {
             await roastTracks(formJson.roast_period);
         }
     }
