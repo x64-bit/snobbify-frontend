@@ -152,21 +152,24 @@ function App() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-emerald-600 to-teal-900 text-white">
-            <header className='text-3xl font-bold'>
-                <h1>&gt;snobbify</h1>
-            </header>
-            <section>
-                <h3>
-                    get your garbage music taste roasted by chatgpt
+        <div className="text-slate-200 flex h-screen">
+            <section className='padding my-auto mr-0.5'>
+                <h1 className='bg-clip-border text-6xl text-white font-bold padding py-0'>
+                    &gt;snobbify
+                </h1>
+                <h3 className='mt-2 mb-12'>
+                    get your garbage music taste roasted by chatgpt {":')"}
                 </h3>
-                {!loggedIn && <a href="http://localhost:8888/login">login to spotify</a>}
+                {!loggedIn && <a className='bg-clip-padding padding p-4 bg-stone-800 rounded-md' href="http://localhost:8888/login">login to spotify</a>}
                 {loggedIn && (
-                    <button onClick={() => roastTracks()}>Generate Roast</button>
+                    <button className='bg-clip-padding padding p-4 bg-stone-800 rounded-md' onClick={() => roastTracks()}>Generate Roast</button>
                 )}
                 {loggedIn && responseLoaded && (
-                    <div>{roast}</div>
+                    <div className='whitespace-pre content-right'>{roast}</div>
                 )}
+            </section>
+            <section className='padding p-4 my-auto mr-0.15 ml-0.5 flex bg-stone-700'>
+                asdfjklsdjfklasjdfklasjdfklasjdklfjasklfjasljfasdl;jfkas;dljkfasdl;
             </section>
         </div>
     )
