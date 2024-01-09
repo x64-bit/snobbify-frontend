@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import SpotifyWebApi from "spotify-web-api-js";
 import 'axios';
 
-const BACKEND_ROUTE = "http://localhost:8888"
+const BACKEND_ROUTE = "https://snobbify-backend.onrender.com"
 
 const spotifyApi = new SpotifyWebApi();
 
