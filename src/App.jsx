@@ -40,7 +40,7 @@ function Header() {
             <h1 className='bg-clip-border text-6xl text-white font-extrabold padding py-0'>
                 &gt;snobbify
             </h1>
-            <h3 className='mt-2 font-medium'>
+            <h3 className='mt-2 text-xl font-medium'>
                 get your garbage music taste roasted by chatgpt {":')"}
             </h3>
         </header>
@@ -52,42 +52,37 @@ function RoastParams ({ handleSubmit }) {
         <form onSubmit={handleSubmit}>
             roast top 5:
             <br></br>
-            <select name='roast-type' className='text-stone bg-stone-600 rounded-md py-1 px-2'>
+            <select name='roast_type' className='text-stone bg-stone-600 rounded-md py-1 px-2'>
                 <option value="artists">artists</option>
                 <option value="tracks">tracks</option>
             </select>
             <br></br>
             time period:
             <br></br>
-            <select name='roast-period' className='text-stone bg-stone-600 rounded-md py-1 px-2'>
-                <option value="short-term">4 weeks</option>
-                <option value="medium-term">6 months</option>
-                <option value="long-term">all time</option>
+            <select name='roast_period' className='text-stone bg-stone-600 rounded-md py-1 px-2'>
+                <option value="short_term">4 weeks</option>
+                <option value="medium_term">6 months</option>
+                <option value="long_term">all time</option>
             </select>
             <br></br>
             <button className='bg-stone-800 hover:bg-stone-900 rounded-md my-4 px-2.5 py-2.5'
-                type="submit">generate roast</button>
+                type='submit'>generate roast</button>
         </form>
     )
 }
 
 function App() {
     const [responseLoaded, setResponseLoaded] = useState(false);
+    const [loading, setLoading] = useState()
     const [roast, setRoast] = useState("");
     const [loggedIn, setLoggedIn] = useState(false);
 
     useEffect (() => {
-        // console.log("This is what we derived from the url: ");
-        // console.log(window.location.hash);
         const newSpotifyToken = getTokenFromUrl();
         // history.pushState("", document.title, window.location.pathname
         //                                                + window.location.search);
         // console.log("This is our spotify token", newSpotifyToken);
         if (newSpotifyToken) {
-            // additional param: expires: 7 (days)
-            // TODO: how the hell do you use token
-            // Cookies.set('token', newSpotifyToken, { secure: true });
-            // setSpotifyToken(newSpotifyToken);
             spotifyApi.setAccessToken(newSpotifyToken);
             // spotifyApi.getMe().then((user) => {
             //     console.log(user);
@@ -98,30 +93,30 @@ function App() {
         // console.log("cookie token:", Cookies.get('token'));
     }, [])
 
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
         // Prevent the browser from reloading the page
+        console.log("bruh momentum");
         e.preventDefault();
 
-        console.log("bruh momentum");
         // Read the form data
         const form = e.target;
         const formData = new FormData(form);
-        // // You can pass formData as a fetch body directly:
-        // fetch('/some-api', { method: form.method, body: formData });
-        // // You can generate a URL out of it, as the browser does by default:
-        // console.log(new URLSearchParams(formData).toString());
-        // You can work with it as a plain object.
-        // const formJson = Object.fromEntries(formData.entries());
-        // console.log(formJson); // (!) This doesn't include multiple select values
-        // // Or you can get an array of name-value pairs.
-        console.log([...formData.entries()]);
+        
+        const formJson = Object.fromEntries(formData.entries());
+        console.log(formJson); 
+        console.log(formJson.roast_type);
+        if (formJson.roast_type = "artists") {
+            await roastArtists(formJson.roast_period);
+        } else if (formJson.roast_type = "tracks") {
+            await roastTracks(formJson.roast_period);
+        }
     }
 
-    async function roastTracks() {
-        // console.log("getNowPlaying")
+    async function roastTracks(time_range) {
+        console.log("roastTracks", time_range);
     
         // not sure if i did this right lol
-        spotifyApi.getMyTopTracks({ limit: 5 })
+        spotifyApi.getMyTopTracks({ limit: 5 , time_range: time_range})
             .then(function(response) {
                 // let topTracks = []
                 let topTracks = {}
@@ -158,16 +153,17 @@ function App() {
             });
     }
 
-    async function roastArtists() {
-        // console.log("getNowPlaying")
+    async function roastArtists(time_range) {
+        console.log("roastArtists", time_range);
     
         // not sure if i did this right lol
-        spotifyApi.getMyTopArtists({ limit: 5 })
+        spotifyApi.getMyTopArtists({ limit: 5, time_range: time_range })
             .then((response) => {
                 let topArtists = []
                 for (let i = 0; i < response.items.length; i++) {
                     topArtists.push(response.items[i].name);
                 }
+                console.log(topArtists);
                 return topArtists;
             }, function(err) {
                 console.log('Something went wrong!', err);
@@ -195,7 +191,7 @@ function App() {
 
     return (
         <div className="text-slate-200 flex min-h-screen">
-            <div className='padding m-auto space-y-5'>
+            <div className='padding mx-auto my-40 space-y-5'>
                 <Header></Header>
                 {!loggedIn && (
                     <div className='h-64 w-32'>
@@ -204,14 +200,16 @@ function App() {
                     </div>
                 )}
                 {loggedIn && !responseLoaded && (
-                    <RoastParams onSubmit={handleSubmit}></RoastParams>
+                    <RoastParams handleSubmit={handleSubmit}></RoastParams>
                 )}
                 {/* {loggedIn && (
                     <button className='bg-stone-800 hover:bg-stone-900 rounded-md px-2.5 py-2.5' 
                         onClick={() => roastArtists()}>generate roast</button>
                 )} */}
+
                 {loggedIn && responseLoaded && (
                     <div className='padding p-4 my-12 max-w-96 flex rounded-md bg-stone-800'>
+                        <button onClick={() => setResponseLoaded(false)}></button>
                         <div className='whitespace-pre font-mono text-wrap'>{"Output: \n> "}{roast}</div>
                     </div>
                 )}
