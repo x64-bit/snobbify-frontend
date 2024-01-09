@@ -1,4 +1,4 @@
-import { redirectToAuthCodeFlow, getAccessToken } from './pkce.jsx'
+// import { redirectToAuthCodeFlow, getAccessToken } from './pkce.jsx'
 import React, { useState, useEffect } from 'react';
 import SpotifyWebApi from "spotify-web-api-js";
 import 'axios';
@@ -152,9 +152,11 @@ function App() {
     }
 
     return (
-        <div className='app'>
-            <header className='app-header'>
+        <div className="min-h-screen bg-gradient-to-b from-emerald-600 to-teal-900 text-white">
+            <header className='text-3xl font-bold'>
                 <h1>&gt;snobbify</h1>
+            </header>
+            <section>
                 <h3>
                     get your garbage music taste roasted by chatgpt
                 </h3>
@@ -165,7 +167,7 @@ function App() {
                 {loggedIn && responseLoaded && (
                     <div>{roast}</div>
                 )}
-            </header>
+            </section>
         </div>
     )
 }
