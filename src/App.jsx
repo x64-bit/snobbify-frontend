@@ -52,14 +52,14 @@ function RoastParams ({ handleSubmit }) {
         <form onSubmit={handleSubmit}>
             roast top 5:
             <br></br>
-            <select className='text-stone bg-stone-600 rounded-md py-1 px-2'>
+            <select name='roast-type' className='text-stone bg-stone-600 rounded-md py-1 px-2'>
                 <option value="artists">artists</option>
                 <option value="tracks">tracks</option>
             </select>
             <br></br>
             time period:
             <br></br>
-            <select className='text-stone bg-stone-600 rounded-md py-1 px-2'>
+            <select name='roast-period' className='text-stone bg-stone-600 rounded-md py-1 px-2'>
                 <option value="short-term">4 weeks</option>
                 <option value="medium-term">6 months</option>
                 <option value="long-term">all time</option>
@@ -77,29 +77,32 @@ function App() {
     const [loggedIn, setLoggedIn] = useState(false);
 
     useEffect (() => {
-        console.log("This is what we derived from the url: ");
-        console.log(window.location.hash);
+        // console.log("This is what we derived from the url: ");
+        // console.log(window.location.hash);
         const newSpotifyToken = getTokenFromUrl();
         // history.pushState("", document.title, window.location.pathname
         //                                                + window.location.search);
-        console.log("This is our spotify token", newSpotifyToken);
+        // console.log("This is our spotify token", newSpotifyToken);
         if (newSpotifyToken) {
             // additional param: expires: 7 (days)
             // TODO: how the hell do you use token
-            Cookies.set('token', newSpotifyToken, { secure: true });
+            // Cookies.set('token', newSpotifyToken, { secure: true });
             // setSpotifyToken(newSpotifyToken);
             spotifyApi.setAccessToken(newSpotifyToken);
-            spotifyApi.getMe().then((user) => {
-                console.log(user);
-            })
+            // spotifyApi.getMe().then((user) => {
+            //     console.log(user);
+            // })
             setLoggedIn(true);
+            console.log("Logged in");
         }
-        console.log("cookie token:", Cookies.get('token'));
+        // console.log("cookie token:", Cookies.get('token'));
     }, [])
 
-    async function handleSubmit(e) {
+    function handleSubmit(e) {
         // Prevent the browser from reloading the page
         e.preventDefault();
+
+        console.log("bruh momentum");
         // Read the form data
         const form = e.target;
         const formData = new FormData(form);
