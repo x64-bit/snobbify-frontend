@@ -4,6 +4,7 @@ import SpotifyWebApi from "spotify-web-api-js";
 import 'axios';
 
 const BACKEND_ROUTE = "https://snobbify-backend.onrender.com"
+const FRONTEND_ROUTE = "https://snobbify.onrender.com";
 
 const spotifyApi = new SpotifyWebApi();
 
@@ -123,9 +124,13 @@ function App() {
             .then(async (topTracks) => {
                 // proxy request to backend to ask for chatGPT output
                 console.log("[roastTracks()] fetching gptResponse")
+                const myHeaders = new Headers()
+                myHeaders.append('content-type', 'application/json');
+                myHeaders.append('Access-Control-Allow-Origin', FRONTEND_ROUTE);
+                // myHeaders.append('Access-Control-Allow-Credentials', 'true');
                 const gptResponse = await fetch(BACKEND_ROUTE + "/roastTracks", {
                     method: "POST",
-                    headers: {'content-type' : 'application/json'},
+                    headers: myHeaders,
                     body: JSON.stringify(topTracks)
                 })
                 return gptResponse;
