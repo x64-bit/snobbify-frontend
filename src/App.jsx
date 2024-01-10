@@ -29,7 +29,7 @@ function Header() {
                 &gt;snobbify
             </h1>
             <h3 className='mt-2 text-xl font-semibold'>
-                get your garbage music taste roasted by chatgpt
+                let chatgpt roast your garbage taste in music
             </h3>
         </header>
     )
